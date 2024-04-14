@@ -1,0 +1,12 @@
+{
+  "name": "threejs-node-starter",
+  "version": "1.0.0",
+  "description": "Starter template for a Node.js project with Three.js",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "three": "0.153.0"
+  }
+}
