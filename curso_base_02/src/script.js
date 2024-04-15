@@ -4,6 +4,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
 import vShader from "./shaders/vertex.glsl";
 import fShader from "./shaders/fragment.glsl";
+console.log(vShader);
+console.log(fShader);
 
 // npm run dev
 
@@ -45,7 +47,7 @@ const renderer = new THREE.WebGLRenderer({
   antialias: true,
 });
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setClearColor("2728#2c", 1.0);
+// renderer.setClearColor("2728#2c", 1.0);
 renderer.setSize(aspect.width, aspect.height);
 
 //OrbitControl
@@ -57,10 +59,10 @@ orbitControls.enableDamping = true;
 
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 50, 50),
-  new THREE.ShaderMaterial(
-    vShader,
-    fShader
-  )
+  new THREE.RawShaderMaterial({
+    vertexShader: vShader,
+    fragmentShader: fShader,
+  })
 );
 scene.add(sphere);
 
