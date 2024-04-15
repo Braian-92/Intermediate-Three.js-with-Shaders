@@ -62,6 +62,11 @@ const sphere = new THREE.Mesh(
   new THREE.RawShaderMaterial({
     vertexShader: vShader,
     fragmentShader: fShader,
+    uniforms: {
+      globeTexture : {
+        value: new THREE.TextureLoader().load('./img/globe.jpg')
+      }
+    },
   })
 );
 scene.add(sphere);
