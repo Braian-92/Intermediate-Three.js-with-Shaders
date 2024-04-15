@@ -2,10 +2,12 @@ import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
+
 import vShader from "./shaders/vertex.glsl";
 import fShader from "./shaders/fragment.glsl";
-console.log(vShader);
-console.log(fShader);
+
+import at_vShader from "./shaders/atmosphere_vertex.glsl";
+import at_fShader from "./shaders/atmosphere_fragment.glsl";
 
 // npm run dev
 
@@ -72,10 +74,26 @@ const sphere = new THREE.Mesh(
 scene.add(sphere);
 
 
+const atmosphere = new THREE.Mesh(
+  new THREE.SphereGeometry(5, 50, 50),
+  new THREE.RawShaderMaterial({
+    vertexShader: at_vShader,
+    fragmentShader: at_fShader,
+    blending: THREE.AdditiveBlending,
+    side: THREE.BackSide
+  })
+);
+
+atmosphere.scale.set(1.1, 1.1, 1.1);
+scene.add(atmosphere);
+
+
 
 
 //Clock Class
 const clock = new THREE.Clock();
+
+const sphereRotationSpeed = 1;
 
 const animate = () => {
   //getElapsedTime
@@ -83,6 +101,8 @@ const animate = () => {
 
   //Update Controls
   orbitControls.update();
+
+  sphere.rotation.y = elapsedTime * sphereRotationSpeed;
 
   //Renderer
   renderer.render(scene, camera);
