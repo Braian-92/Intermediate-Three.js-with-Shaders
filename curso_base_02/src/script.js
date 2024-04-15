@@ -37,7 +37,7 @@ const camera = new THREE.PerspectiveCamera(
   75,
   aspect.width / aspect.height,
   0.01,
-  100
+  10000
 );
 camera.position.z = 20;
 scene.add(camera);
@@ -87,7 +87,37 @@ const atmosphere = new THREE.Mesh(
 );
 
 atmosphere.scale.set(1.1, 1.1, 1.1);
+
+const starGeometry = new THREE.BufferGeometry();
+const starVertices = [];
+for (let i = 0; i < 10000; i++) {
+  const x = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
+  const y = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
+  const z = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
+  starVertices.push(x, y, z);
+}
+
+starGeometry.setAttribute(
+  'position',
+  new THREE.Float32BufferAttribute(starVertices, 3)
+);
+
+const starMaterial = new THREE.PointsMaterial({
+  color: 0xffffff,
+  size: 2 // Tamaño de las estrellas
+});
+
+const stars = new THREE.Points(
+  starGeometry,
+  starMaterial
+);
+
+group.add(stars);
+
+
+
 group.add(atmosphere);
+
 
 
 
@@ -105,7 +135,6 @@ const mouse = {
 addEventListener('mousemove', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-  console.log(mouse);
 });
 
 const animate = () => {
