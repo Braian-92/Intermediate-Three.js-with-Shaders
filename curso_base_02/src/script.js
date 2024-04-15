@@ -56,6 +56,8 @@ renderer.setSize(aspect.width, aspect.height);
 const orbitControls = new OrbitControls(camera, canvas);
 orbitControls.enableDamping = true;
 
+const group = new THREE.Group();
+scene.add(group);
 
 
 
@@ -71,7 +73,7 @@ const sphere = new THREE.Mesh(
     },
   })
 );
-scene.add(sphere);
+group.add(sphere);
 
 
 const atmosphere = new THREE.Mesh(
@@ -85,7 +87,7 @@ const atmosphere = new THREE.Mesh(
 );
 
 atmosphere.scale.set(1.1, 1.1, 1.1);
-scene.add(atmosphere);
+group.add(atmosphere);
 
 
 
@@ -93,7 +95,18 @@ scene.add(atmosphere);
 //Clock Class
 const clock = new THREE.Clock();
 
-const sphereRotationSpeed = 1;
+const sphereRotationSpeed = 0.3;
+
+const mouse = {
+  x: undefined,
+  y: undefined
+};
+
+addEventListener('mousemove', (event) =>{
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  console.log(mouse);
+});
 
 const animate = () => {
   //getElapsedTime
@@ -103,6 +116,12 @@ const animate = () => {
   orbitControls.update();
 
   sphere.rotation.y = elapsedTime * sphereRotationSpeed;
+  // group.rotation.y = mouse.x * 0.5;
+  gsap.to(group.rotation, {
+    x: -mouse.y * 0.5,
+    y: mouse.x * 0.5,
+    duration: 2
+  })
 
   //Renderer
   renderer.render(scene, camera);
@@ -110,4 +129,9 @@ const animate = () => {
   //RequestAnimationFrame
   window.requestAnimationFrame(animate);
 };
+
+
+
 animate();
+
+
