@@ -131,41 +131,76 @@ const clock = new THREE.Clock();
 
 const sphereRotationSpeed = 0.3;
 
+function crearPunto(latitude, longitude){
+  const point = new THREE.Mesh(
+    new THREE.SphereGeometry(0.05, 50, 50),
+    new THREE.MeshBasicMaterial({
+      color: '#ff0000'
+    })
+  );
+  // -34.61315, -58.37723 buenos aires
+  // 23.6345 -102.5528 mexico
+  // arg
+  // const latitude = -34.61315
+  // const longitude = -58.37723
+  // mex
+  // const latitude = 23.6345
+  // const longitude = -102.5528
 
-const point = new THREE.Mesh(
-  new THREE.SphereGeometry(0.05, 50, 50),
-  new THREE.MeshBasicMaterial({
-    color: '#ff0000'
-  })
-);
-// -34.61315, -58.37723 buenos aires
-// -23.6345 102.5528 mexico
-// arg
-const latitude = -34.61315
-const longitude = -58.37723
-// mex
-// const latitude = 23.6345
-// const longitude = -102.5528
+  const latitudeRad = (latitude / 180) * Math.PI
+  const longitudeRad = (longitude / 180) * Math.PI
 
-const latitudeRad = (latitude / 180) * Math.PI
-const longitudeRad = (longitude / 180) * Math.PI
+  const radius = 5
 
-const radius = 5
+  const x = radius * Math.cos(latitudeRad) * Math.sin(longitudeRad)
+  const y = radius * Math.sin(latitudeRad)
+  const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
 
-const x = radius * Math.cos(latitudeRad) * Math.sin(longitudeRad)
-const y = radius * Math.sin(latitudeRad)
-const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
+  console.log({x, y, z});
 
-console.log({x, y, z});
+  point.position.x = x;
+  point.position.y = y;
+  point.position.z = z;
 
-point.position.x = x;
-point.position.y = y;
-point.position.z = z;
+
+
+  group.add(point);
+}
+// Coordenadas para diferentes capitales de países
+crearPunto(-34.6037, -58.3816);  // Argentina - Buenos Aires
+crearPunto(40.7128, -74.0060);   // Estados Unidos - Nueva York
+crearPunto(51.5074, -0.1278);    // Reino Unido - Londres
+crearPunto(48.8566, 2.3522);     // Francia - París
+crearPunto(55.7558, 37.6176);    // Rusia - Moscú
+crearPunto(35.6895, 139.6917);   // Japón - Tokio
+crearPunto(39.9042, 116.4074);   // China - Pekín
+crearPunto(55.7558, 12.5918);    // Dinamarca - Copenhague
+crearPunto(52.5200, 13.4050);    // Alemania - Berlín
+crearPunto(41.9028, 12.4964);    // Italia - Roma
+crearPunto(-33.8688, 151.2093);  // Australia - Sídney
+crearPunto(-22.9068, -43.1729);  // Brasil - Río de Janeiro
+crearPunto(19.4326, -99.1332);   // México - Ciudad de México
+crearPunto(55.7558, 37.6176);    // Rusia - Moscú
+crearPunto(-4.4419, 15.2663);    // República Democrática del Congo - Kinshasa
+crearPunto(37.7749, -122.4194);  // Estados Unidos - San Francisco
+crearPunto(-33.9249, 18.4241);   // Sudáfrica - Ciudad del Cabo
+crearPunto(35.6895, 51.3890);    // Irán - Teherán
+crearPunto(28.6139, 77.2090);    // India - Nueva Delhi
+crearPunto(59.3293, 18.0686);    // Suecia - Estocolmo
+crearPunto(39.9334, 32.8597);    // Turquía - Ankara
+crearPunto(-30.0331, -51.23);    // Brasil - Porto Alegre
+crearPunto(31.2304, 121.4737);   // China - Shanghái
+crearPunto(55.7558, 37.6176);    // Rusia - Moscú
+crearPunto(37.5665, 126.9780);   // Corea del Sur - Seúl
+crearPunto(-25.2866, -57.356);   // Paraguay - Asunción
+crearPunto(-12.0464, -77.0428);  // Perú - Lima
+crearPunto(-36.8485, 174.7633);  // Nueva Zelanda - Auckland
+crearPunto(38.9072, -77.0369);   // Estados Unidos - Washington D.C.
+crearPunto(59.9139, 10.7522);    // Noruega - Oslo
 
 sphere.rotation.y = -Math.PI / 2
 
 
-group.add(point);
 
 const mouse = {
   x: undefined,
@@ -186,11 +221,11 @@ const animate = () => {
 
   // sphere.rotation.y = elapsedTime * sphereRotationSpeed;
   // group.rotation.y = mouse.x * 0.5;
-  gsap.to(group.rotation, {
-    x: -mouse.y * 2.5,
-    y: mouse.x * 2.5,
-    duration: 2
-  })
+  // gsap.to(group.rotation, {
+  //   x: -mouse.y * 2.5,
+  //   y: mouse.x * 2.5,
+  //   duration: 2
+  // })
 
   //Renderer
   renderer.render(scene, camera);
