@@ -17,3 +17,19 @@ body {
   left: 0;
   top: 0;
 }
+
+.popup {
+  z-index: 9999999;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  pointer-events: none; 
+  transition: opacity 0.3s ease; /* transición suave de la opacidad */
+  white-space: nowrap; /* Evitar que el texto se divida en renglones */
+}
+
+.text {
+  margin-bottom: 5px;
+}
