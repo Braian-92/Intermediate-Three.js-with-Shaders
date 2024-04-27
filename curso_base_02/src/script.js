@@ -132,39 +132,30 @@ const clock = new THREE.Clock();
 const sphereRotationSpeed = 0.3;
 
 function crearPunto(latitude, longitude){
-  const point = new THREE.Mesh(
-    new THREE.SphereGeometry(0.05, 50, 50),
+  const extencion = 0.8
+  const box = new THREE.Mesh(
+    new THREE.BoxGeometry(0.1, 0.1, extencion),
     new THREE.MeshBasicMaterial({
       color: '#ff0000'
     })
   );
-  // -34.61315, -58.37723 buenos aires
-  // 23.6345 -102.5528 mexico
-  // arg
-  // const latitude = -34.61315
-  // const longitude = -58.37723
-  // mex
-  // const latitude = 23.6345
-  // const longitude = -102.5528
-
   const latitudeRad = (latitude / 180) * Math.PI
   const longitudeRad = (longitude / 180) * Math.PI
-
   const radius = 5
-
   const x = radius * Math.cos(latitudeRad) * Math.sin(longitudeRad)
   const y = radius * Math.sin(latitudeRad)
   const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
 
-  console.log({x, y, z});
+  box.position.x = x;
+  box.position.y = y;
+  box.position.z = z;
 
-  point.position.x = x;
-  point.position.y = y;
-  point.position.z = z;
+  box.lookAt(0, 0, 0)
+  box.geometry.applyMatrix4(
+    new THREE.Matrix4().makeTranslation(0, 0, -(extencion / 2) )
+  )
 
-
-
-  group.add(point);
+  group.add(box);
 }
 // Coordenadas para diferentes capitales de países
 crearPunto(-34.6037, -58.3816);  // Argentina - Buenos Aires
@@ -221,11 +212,14 @@ const animate = () => {
 
   // sphere.rotation.y = elapsedTime * sphereRotationSpeed;
   // group.rotation.y = mouse.x * 0.5;
-  // gsap.to(group.rotation, {
-  //   x: -mouse.y * 2.5,
-  //   y: mouse.x * 2.5,
-  //   duration: 2
-  // })
+  if(mouse.x){
+    // gsap.to(group.rotation, {
+    //   x: -mouse.y * 2.5,
+    //   y: mouse.x * 2.5,
+    //   duration: 2
+    // })
+  }
+  
 
   //Renderer
   renderer.render(scene, camera);
