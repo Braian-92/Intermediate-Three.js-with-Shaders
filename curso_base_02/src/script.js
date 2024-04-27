@@ -136,7 +136,7 @@ function crearPunto(latitude, longitude){
   const box = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 0.1, extencion),
     new THREE.MeshBasicMaterial({
-      color: '#ff0000'
+      color: '#3bf7ff'
     })
   );
   const latitudeRad = (latitude / 180) * Math.PI
@@ -156,6 +156,15 @@ function crearPunto(latitude, longitude){
   )
 
   group.add(box);
+
+  gsap.to(box.scale,{
+    z: 0,
+    duration: 2,
+    yoyo: true,
+    repeat: -1,
+    ease: 'linear',
+    delay: Math.random() * 2
+  })
 }
 // Coordenadas para diferentes capitales de países
 crearPunto(-34.6037, -58.3816);  // Argentina - Buenos Aires
@@ -197,6 +206,7 @@ const mouse = {
   x: undefined,
   y: undefined
 };
+
 
 addEventListener('mousemove', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
