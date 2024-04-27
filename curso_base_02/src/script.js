@@ -16,18 +16,12 @@ const scene = new THREE.Scene();
 
 //Resizing
 window.addEventListener("resize", () => {
-  //Update Size
-  aspect.width = canvas.offsetWidth;
-  aspect.height = canvas.offsetHeight;
-
-  //New Aspect Ratio
-  camera.aspect = aspect.width / aspect.height;
+  // Actualizar tamaño del lienzo
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  renderer.setSize(width, height);
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-
-  //New RendererSize
-  // renderer.setSize(aspect.width, aspect.height);
-  renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
 
 //Camera
@@ -207,6 +201,7 @@ const mouse = {
   y: undefined
 };
 
+const raycaster = new THREE.Raycaster()
 
 addEventListener('mousemove', (event) =>{
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -223,6 +218,7 @@ const animate = () => {
   // sphere.rotation.y = elapsedTime * sphereRotationSpeed;
   // group.rotation.y = mouse.x * 0.5;
   if(mouse.x){
+    // console.log(mouse)
     // gsap.to(group.rotation, {
     //   x: -mouse.y * 2.5,
     //   y: mouse.x * 2.5,
@@ -230,6 +226,15 @@ const animate = () => {
     // })
   }
   
+  raycaster.setFromCamera(mouse, camera)
+
+  const intersects = raycaster.intersectObjects(group.children.filter(mesh => {
+    return mesh.geometry.type === 'BoxGeometry'
+  }))
+
+  for (let i = 0; i < intersects.length; i++) {
+    console.log('ok');
+  }
 
   //Renderer
   renderer.render(scene, camera);
