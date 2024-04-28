@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600;700;800;900&display=swap");
-
 * {
   margin: 0;
   padding: 0;
@@ -7,29 +5,17 @@
   font-family: "Poppins", sans-serif;
 }
 
-body {
-  height: 100vh;
-  overflow: hidden;
-}
-
+/* Estilos para el contenedor del canvas */
 #canvasContainer {
-  position: absolute;
-  left: 0;
-  top: 0;
+  width: 100vw; /* Ancho completo de la ventana */
+  height: 100vh; /* Altura completa de la ventana */
+  overflow: hidden; /* Oculta el desbordamiento */
+  position: relative; /* Posición relativa para alinear el canvas */
 }
 
-.popup {
-  z-index: 9999999;
-  position: fixed;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  pointer-events: none; 
-  transition: opacity 0.3s ease; /* transición suave de la opacidad */
-  white-space: nowrap; /* Evitar que el texto se divida en renglones */
-}
-
-.text {
-  margin-bottom: 5px;
+/* Estilos para el canvas */
+#canvas {
+  width: 100%; /* Ancho completo del contenedor */
+  height: 100%; /* Altura completa del contenedor */
+  display: block; /* Asegura que el canvas ocupe todo el espacio disponible */
 }
