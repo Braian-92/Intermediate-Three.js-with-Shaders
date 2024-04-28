@@ -24,6 +24,7 @@
     "stats.js": "^0.17.0",
     "style-loader": "^2.0.0",
     "three": "^0.139.2",
+    "turf": "^3.0.14",
     "uuid": "^8.3.2",
     "webpack": "^5.24.2",
     "webpack-cli": "^4.5.0",

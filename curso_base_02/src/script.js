@@ -1,9 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import * as TURF from 'turf-jsts/jsts.js'
-
-console.log('turf', TURF);
-
+// import * as TURF from 'turf-jsts/jsts.js'
+import * as TURF from 'turf/turf.min.js'
 import './style.css'
 
 const canvas = document.querySelector('#canvas')
@@ -89,7 +87,7 @@ function onClick(event) {
     const intersectPoint = intersects[0].point
     const coordinates = convertirCoordenadasCartesianasAGeograficas(intersectPoint)
     console.log('Coordenadas latitud y longitud:', coordinates)
-    // Llamar a la función que maneja las coordenadas aquí
+    verificarGeometriaGeoJSON(coordinates)
   }
 }
 
@@ -168,6 +166,13 @@ function convertirCoordenadasGeograficasACartesianas(coord) {
   const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
 
   return { x, y, z }
+}
+
+// Función para verificar en qué geometría del GeoJSON se encuentra una coordenada
+function verificarGeometriaGeoJSON(coordinates) {
+  const point = TURF.point([coordinates.long, coordinates.lat])
+  // Lógica para recorrer las geometrías del GeoJSON y verificar la inclusión del punto
+  // Implementar aquí la lógica para recorrer el GeoJSON y verificar la inclusión del punto
 }
 
 // Crear línea de puntos para el GeoJSON
