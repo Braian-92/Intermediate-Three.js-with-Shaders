@@ -41,8 +41,9 @@ function cargarGeoJSON(url) {
     })
 }
 
-async function dibujarLocalidadesDeArgentina() {
-  const argentinaGeoJSON = await cargarGeoJSON('argentina.geojson')
+async function dibujarGeojson(archivo, colores) {
+  // const argentinaGeoJSON = await cargarGeoJSON('argentina.geojson')
+  const argentinaGeoJSON = await cargarGeoJSON(archivo)
 
   if (!argentinaGeoJSON) {
     console.error('No se pudo cargar el archivo GeoJSON de Argentina.')
@@ -55,9 +56,7 @@ async function dibujarLocalidadesDeArgentina() {
     if (feature.geometry.type === 'MultiPolygon') {
       const coordenadas = feature.geometry.coordinates
 
-      const colores = [
-        new THREE.Color(0x00ff00)
-      ]
+      
 
       coordenadas.forEach((poligono) => {
         let anilloExteriorXYZ = []
@@ -119,7 +118,14 @@ function crearLineasDePuntos(puntos, colores) {
   return new THREE.Line(geometria, material)
 }
 
-dibujarLocalidadesDeArgentina()
+const colores1 = [
+  new THREE.Color(0xcccccc)
+]
+dibujarGeojson('continents.json', colores1)
+const colores2 = [
+  new THREE.Color(0x00ff00)
+]
+dibujarGeojson('argentina.geojson', colores2)
 
 //Resizing
 window.addEventListener('resize', () => {
