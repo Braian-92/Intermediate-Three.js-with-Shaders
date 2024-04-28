@@ -1,63 +1,65 @@
-import "./style.css";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import gsap from "gsap";
+import './style.css'
 
-import vShader from "./shaders/vertex.glsl";
-import fShader from "./shaders/fragment.glsl";
+// https://restcountries.com/v3.1/all
+import paisesJson from './paises.json'
+console.log('paisesJson', paisesJson)
 
-import at_vShader from "./shaders/atmosphere_vertex.glsl";
-import at_fShader from "./shaders/atmosphere_fragment.glsl";
+import * as THREE from 'three'
+import * as Curves from 'three/examples/jsm/curves/CurveExtras.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import gsap from 'gsap'
+
+import vShader from './shaders/vertex.glsl'
+import fShader from './shaders/fragment.glsl'
+
+import at_vShader from './shaders/atmosphere_vertex.glsl'
+import at_fShader from './shaders/atmosphere_fragment.glsl'
 
 // npm run dev
-const canvas = document.querySelector("#canvasContainer");
+const canvas = document.querySelector('#canvasContainer')
 
-const scene = new THREE.Scene();
+const scene = new THREE.Scene()
 
 //Resizing
-window.addEventListener("resize", () => {
+window.addEventListener('resize', () => {
   // Actualizar tamaño del lienzo
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  renderer.setSize(width, height);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-});
+  const width = window.innerWidth
+  const height = window.innerHeight
+  renderer.setSize(width, height)
+  camera.aspect = width / height
+  camera.updateProjectionMatrix()
+})
 
 //Camera
 const aspect = {
   width: canvas.offsetWidth,
-  height: canvas.offsetHeight,
-};
+  height: canvas.offsetHeight
+}
 const camera = new THREE.PerspectiveCamera(
   75,
   aspect.width / aspect.height,
   0.01,
   10000
-);
-camera.position.z = 20;
-scene.add(camera);
-
-
+)
+camera.position.z = 20
+scene.add(camera)
 
 //Renderer
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
-  antialias: true,
-});
-renderer.setPixelRatio(window.devicePixelRatio);
+  antialias: true
+})
+renderer.setPixelRatio(window.devicePixelRatio)
 // renderer.setClearColor("2728#2c", 1.0);
-renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+renderer.setSize(canvas.offsetWidth, canvas.offsetHeight)
 
 //OrbitControl
-const orbitControls = new OrbitControls(camera, canvas);
-orbitControls.enableDamping = true;
+const orbitControls = new OrbitControls(camera, canvas)
+orbitControls.enableDamping = true
 
-const group = new THREE.Group();
-scene.add(group);
-
-
+const group = new THREE.Group()
+scene.add(group)
 
 const sphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 50, 50),
@@ -65,14 +67,13 @@ const sphere = new THREE.Mesh(
     vertexShader: vShader,
     fragmentShader: fShader,
     uniforms: {
-      globeTexture : {
+      globeTexture: {
         value: new THREE.TextureLoader().load('./img/globe.jpg')
       }
-    },
+    }
   })
-);
-group.add(sphere);
-
+)
+group.add(sphere)
 
 const atmosphere = new THREE.Mesh(
   new THREE.SphereGeometry(5, 50, 50),
@@ -82,95 +83,96 @@ const atmosphere = new THREE.Mesh(
     blending: THREE.AdditiveBlending,
     side: THREE.BackSide
   })
-);
+)
 
-atmosphere.scale.set(1.1, 1.1, 1.1);
+atmosphere.scale.set(1.1, 1.1, 1.1)
 
-const starGeometry = new THREE.BufferGeometry();
-const starVertices = [];
+const starGeometry = new THREE.BufferGeometry()
+const starVertices = []
 for (let i = 0; i < 10000; i++) {
-  const x = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
-  const y = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
-  const z = (Math.random() * 2 - 1) * 2000; // Rango -2000 a 2000
-  starVertices.push(x, y, z);
+  const x = (Math.random() * 2 - 1) * 2000 // Rango -2000 a 2000
+  const y = (Math.random() * 2 - 1) * 2000 // Rango -2000 a 2000
+  const z = (Math.random() * 2 - 1) * 2000 // Rango -2000 a 2000
+  starVertices.push(x, y, z)
 }
 
 starGeometry.setAttribute(
   'position',
   new THREE.Float32BufferAttribute(starVertices, 3)
-);
+)
 
 const starMaterial = new THREE.PointsMaterial({
   color: 0xffffff,
   size: 2 // Tamaño de las estrellas
-});
+})
 
-const stars = new THREE.Points(
-  starGeometry,
-  starMaterial
-);
+const stars = new THREE.Points(starGeometry, starMaterial)
 
-group.add(stars);
+group.add(stars)
 
-
-
-group.add(atmosphere);
-
-
-
-
+group.add(atmosphere)
 
 //Clock Class
-const clock = new THREE.Clock();
+const clock = new THREE.Clock()
 
-const sphereRotationSpeed = 0.3;
+const sphereRotationSpeed = 0.3
 
 function formatearNumero(numero) {
   // Convertir el número a una cadena y separar los números antes y después del punto decimal
-  const partes = numero.toString().split(".");
+  const partes = numero.toString().split('.')
   // Guardar la parte entera del número
-  const parteEntera = partes[0];
+  const parteEntera = partes[0]
   // Crear una expresión regular para agregar puntos cada tres dígitos
-  const regex = /\B(?=(\d{3})+(?!\d))/g;
+  const regex = /\B(?=(\d{3})+(?!\d))/g
   // Formatear la parte entera del número
-  const parteEnteraFormateada = parteEntera.replace(regex, ".");
+  const parteEnteraFormateada = parteEntera.replace(regex, '.')
   // Si hay parte decimal, añadirla al resultado
-  const resultado = partes.length > 1 ? parteEnteraFormateada + "," + partes[1] : parteEnteraFormateada;
+  const resultado =
+    partes.length > 1
+      ? parteEnteraFormateada + ',' + partes[1]
+      : parteEnteraFormateada
   // Devolver el resultado
-  return resultado;
+  return resultado
 }
 
 function buscarMaxMinPoblacion(paises) {
   // Inicializar valores máximos y mínimos con el primer país del array
-  let maximo = paises[0].poblacion;
-  let minimo = paises[0].poblacion;
+  let maximo = paises[0].poblacion
+  let minimo = paises[0].poblacion
 
   // Recorrer el array de países para buscar los valores máximos y mínimos
-  paises.forEach(pais => {
+  paises.forEach((pais) => {
     if (pais.poblacion > maximo) {
-      maximo = pais.poblacion;
+      maximo = pais.poblacion
     }
     if (pais.poblacion < minimo) {
-      minimo = pais.poblacion;
+      minimo = pais.poblacion
     }
-  });
+  })
 
   // Devolver un objeto con los valores máximos y mínimos
-  return { maximo, minimo };
+  return { maximo, minimo }
 }
 
-function valorEquivalente(valor, minimo, maximo, escalaMin, escalaMax){
-  const porcentaje = (valor - escalaMin) / (maximo - escalaMin);
-  const extencionFinal = escalaMin + (porcentaje * (escalaMax - escalaMin));
-  return extencionFinal;
+function valorEquivalente(valor, minimo, maximo, escalaMin, escalaMax) {
+  const porcentaje = (valor - escalaMin) / (maximo - escalaMin)
+  const extencionFinal = escalaMin + porcentaje * (escalaMax - escalaMin)
+  return extencionFinal
 }
 
-function crearPunto(parametros, escalas){
+function crearPunto(parametros, escalas) {
+  console.log("🚀 ~ crearPunto ~ escalas:", escalas)
+  const extencionMin = 0.1
+  const extencionMax = 3
 
-  const extencionMin = 0.1;
-  const extencionMax = 3;
-
-  const extencion = valorEquivalente(parametros.poblacion, escalas.minimo, escalas.maximo, extencionMin, extencionMax)
+  const extencion = valorEquivalente(
+    parametros.poblacion,
+    escalas.minimo,
+    escalas.maximo,
+    extencionMin,
+    extencionMax
+  )
+  console.log("🚀 ~ crearPunto ~ extencion:", extencion)
 
   const box = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 0.1, extencion),
@@ -179,7 +181,7 @@ function crearPunto(parametros, escalas){
       opacity: 0.4,
       transparent: true
     })
-  );
+  )
   const latitudeRad = (parametros.lat / 180) * Math.PI
   const longitudeRad = (parametros.long / 180) * Math.PI
   const radius = 5
@@ -187,20 +189,20 @@ function crearPunto(parametros, escalas){
   const y = radius * Math.sin(latitudeRad)
   const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
 
-  box.position.x = x;
-  box.position.y = y;
-  box.position.z = z;
-  box.attributos = parametros;
+  box.position.x = x
+  box.position.y = y
+  box.position.z = z
+  box.attributos = parametros
 
   box.lookAt(0, 0, 0)
   box.geometry.applyMatrix4(
-    new THREE.Matrix4().makeTranslation(0, 0, -(extencion / 2) )
+    new THREE.Matrix4().makeTranslation(0, 0, -(extencion / 2))
   )
 
-  group.add(box);
+  group.add(box)
 
-  box.scale.z = 0;
-  gsap.to(box.scale,{
+  box.scale.z = 0
+  gsap.to(box.scale, {
     z: 1,
     duration: 2,
     // yoyo: true,
@@ -209,8 +211,6 @@ function crearPunto(parametros, escalas){
     delay: Math.random() * 2
   })
 }
-
-
 
 const paises = [
   {
@@ -221,7 +221,7 @@ const paises = [
   },
   {
     lat: 40.7128,
-    long: -74.0060,
+    long: -74.006,
     nombre: 'Estados Unidos - Nueva York',
     poblacion: 8398748
   },
@@ -262,8 +262,8 @@ const paises = [
     poblacion: 794128
   },
   {
-    lat: 52.5200,
-    long: 13.4050,
+    lat: 52.52,
+    long: 13.405,
     nombre: 'Alemania - Berlín',
     poblacion: 3669491
   },
@@ -311,13 +311,13 @@ const paises = [
   },
   {
     lat: 35.6895,
-    long: 51.3890,
+    long: 51.389,
     nombre: 'Irán - Teherán',
     poblacion: 8693706
   },
   {
     lat: 28.6139,
-    long: 77.2090,
+    long: 77.209,
     nombre: 'India - Nueva Delhi',
     poblacion: 257803
   },
@@ -347,7 +347,7 @@ const paises = [
   },
   {
     lat: 37.5665,
-    long: 126.9780,
+    long: 126.978,
     nombre: 'Corea del Sur - Seúl',
     poblacion: 9741381
   },
@@ -381,63 +381,73 @@ const paises = [
     nombre: 'Noruega - Oslo',
     poblacion: 693494
   }
-];
-const minMaxPaises = buscarMaxMinPoblacion(paises);
-console.log('minMaxPaises');
-console.log(paises);
-console.log(minMaxPaises);
-paises.forEach(pais => {
-  crearPunto(pais, minMaxPaises);
-});
+]
+const minMaxPaises = buscarMaxMinPoblacion(paises)
+console.log('minMaxPaises')
+console.log(paises)
+console.log(minMaxPaises)
+paises.forEach((pais) => {
+  // crearPunto(pais, minMaxPaises);
+})
+
+let arrayPaisesV2 = []
+
+paisesJson.forEach((paisV2Json) => {
+  const parametrosV2 = {
+    lat: paisV2Json.latlng[0],
+    long: paisV2Json.latlng[1],
+    nombre: paisV2Json.name.common,
+    poblacion: paisV2Json.population
+  }
+  arrayPaisesV2.push(parametrosV2)
+})
+
+const minMaxPaisesV2 = buscarMaxMinPoblacion(arrayPaisesV2)
+arrayPaisesV2.forEach((paisesV2) => {
+  crearPunto(paisesV2, minMaxPaisesV2)
+})
 
 sphere.rotation.y = -Math.PI / 2
 
-
-const popup = document.getElementById('popup');
-const popup_texto_01 = document.getElementById("text1");
-const popup_texto_02 = document.getElementById("text2");
-
-
+const popup = document.getElementById('popup')
+const popup_texto_01 = document.getElementById('text1')
+const popup_texto_02 = document.getElementById('text2')
 
 // Función para mostrar el popup
 function showPopup(x, y) {
-  popup.style.left = x + 'px';
-  popup.style.top = y + 'px';
+  popup.style.left = x + 'px'
+  popup.style.top = y + 'px'
 }
 
 // Evento para seguir el mouse y mostrar el popup
-document.addEventListener('mousemove', function(event) {
-  const mouseX = event.clientX;
-  const mouseY = event.clientY;
-  showPopup(mouseX, mouseY);
-});
-
-
-
-
+document.addEventListener('mousemove', function (event) {
+  const mouseX = event.clientX
+  const mouseY = event.clientY
+  showPopup(mouseX, mouseY)
+})
 
 const mouse = {
   x: undefined,
   y: undefined
-};
+}
 
 const raycaster = new THREE.Raycaster()
 
-addEventListener('mousemove', (event) =>{
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-});
+addEventListener('mousemove', (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+})
 
 const animate = () => {
   //getElapsedTime
-  const elapsedTime = clock.getElapsedTime();
+  const elapsedTime = clock.getElapsedTime()
 
   //Update Controls
-  orbitControls.update();
+  orbitControls.update()
 
   // sphere.rotation.y = elapsedTime * sphereRotationSpeed;
   // group.rotation.y = mouse.x * 0.5;
-  if(mouse.x){
+  if (mouse.x) {
     // console.log(mouse)
     // gsap.to(group.rotation, {
     //   x: -mouse.y * 2.5,
@@ -445,26 +455,28 @@ const animate = () => {
     //   duration: 2
     // })
   }
-  
+
   raycaster.setFromCamera(mouse, camera)
 
-  const intersects = raycaster.intersectObjects(group.children.filter(mesh => {
-    return mesh.geometry.type === 'BoxGeometry'
-  }))
+  const intersects = raycaster.intersectObjects(
+    group.children.filter((mesh) => {
+      return mesh.geometry.type === 'BoxGeometry'
+    })
+  )
 
-
-  group.children.forEach(mesh => {
+  group.children.forEach((mesh) => {
     mesh.material.opacity = 0.4
-    
   })
   gsap.set(popup, {
     opacity: 0
   })
 
   for (let i = 0; i < intersects.length; i++) {
-    console.log(intersects[i].object.attributos);
-    popup_texto_01.textContent = intersects[i].object.attributos.nombre;
-    popup_texto_02.textContent = formatearNumero(intersects[i].object.attributos.poblacion);
+    console.log(intersects[i].object.attributos)
+    popup_texto_01.textContent = intersects[i].object.attributos.nombre
+    popup_texto_02.textContent = formatearNumero(
+      intersects[i].object.attributos.poblacion
+    )
     intersects[i].object.material.opacity = 1
     gsap.set(popup, {
       opacity: 1
@@ -472,14 +484,10 @@ const animate = () => {
   }
 
   //Renderer
-  renderer.render(scene, camera);
+  renderer.render(scene, camera)
 
   //RequestAnimationFrame
-  window.requestAnimationFrame(animate);
-};
+  window.requestAnimationFrame(animate)
+}
 
-
-
-animate();
-
-
+animate()
