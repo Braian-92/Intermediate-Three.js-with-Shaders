@@ -18,11 +18,20 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.z = 20
 scene.add(camera)
 
-// Crear esfera que representa al mundo
-const geometry = new THREE.SphereGeometry(5, 32, 32)
-const material = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.05 })
-const sphere = new THREE.Mesh(geometry, material)
-scene.add(sphere)
+// Variables para el tamaño de la esfera del planeta
+let planetRadius = 2.5 // Tamaño predeterminado
+const planetGeometry = new THREE.SphereGeometry(planetRadius, 32, 32) // Crear esfera
+const planetMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.05 })
+const planet = new THREE.Mesh(planetGeometry, planetMaterial)
+scene.add(planet)
+planet.name = 'planeta'
+
+// Crear esfera pequeña que seguirá al mouse
+const pointerGeometry = new THREE.SphereGeometry(0.05, 16, 16) // Tamaño fijo para la esfera del puntero
+const pointerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0.3 })
+const pointer = new THREE.Mesh(pointerGeometry, pointerMaterial)
+scene.add(pointer)
+pointer.name = 'esferaPuntero'
 
 const renderer = new THREE.WebGLRenderer({
   canvas,
@@ -38,6 +47,26 @@ orbitControls.rotateSpeed = 0.3
 orbitControls.zoomSpeed = 0.5
 orbitControls.panSpeed = 0.5
 
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+
+function onMouseMove(event) {
+  // Normalizar coordenadas del mouse
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+  // Actualizar posición de la esfera pequeña
+  raycaster.setFromCamera(mouse, camera)
+  const intersects = raycaster.intersectObject(planet)
+  if (intersects.length > 0) {
+    const intersectPoint = intersects[0].point
+    pointer.position.copy(intersectPoint)
+  }
+}
+
+document.addEventListener('mousemove', onMouseMove, false)
+
+// Función para cargar archivos GeoJSON y dibujarlos
 function cargarGeoJSON(url) {
   return fetch(url)
     .then(response => response.json())
@@ -79,8 +108,27 @@ async function dibujarGeojson(archivo, colores) {
   })
 
   scene.add(group)
+
+  // Calcular el radio máximo
+  const maxRadius = Math.max(...group.children.map(linea => {
+    const positions = linea.geometry.attributes.position.array
+    const radiusArray = []
+    for (let i = 0; i < positions.length; i += 3) {
+      const x = positions[i]
+      const y = positions[i + 1]
+      const z = positions[i + 2]
+      radiusArray.push(Math.sqrt(x * x + y * y + z * z))
+    }
+    return Math.max(...radiusArray)
+  }))
+
+  // Ajustar el tamaño de la esfera del planeta
+  planetRadius = maxRadius
+  planet.geometry.dispose() // Limpiar geometría existente
+  planet.geometry = new THREE.SphereGeometry(planetRadius, 32, 32) // Crear nueva geometría
 }
 
+// Convertir coordenadas geográficas a cartesianas
 function convertirCoordenadasGeograficasACartesianas(coord) {
   const latitudeRad = (coord.lat / 180) * Math.PI
   const longitudeRad = (coord.long / 180) * Math.PI
@@ -93,6 +141,7 @@ function convertirCoordenadasGeograficasACartesianas(coord) {
   return { x, y, z }
 }
 
+// Crear línea de puntos para el GeoJSON
 function crearLineaDePuntos(puntos, colores) {
   const material = new THREE.LineBasicMaterial({ vertexColors: true })
   const geometria = new THREE.BufferGeometry()
@@ -118,6 +167,7 @@ function crearLineaDePuntos(puntos, colores) {
   return new THREE.Line(geometria, material)
 }
 
+// Dibujar los archivos GeoJSON
 const colores1 = [
   new THREE.Color(0xcccccc)
 ]
