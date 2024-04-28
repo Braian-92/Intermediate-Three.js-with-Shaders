@@ -4,6 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as TURF from 'turf/turf.min.js'
 import './style.css'
 
+let archivosGeoJson = {};
+
 const canvas = document.querySelector('#canvas')
 const scene = new THREE.Scene()
 
@@ -113,6 +115,7 @@ async function dibujarGeojson(archivo, colores) {
 
   const group = new THREE.Group()
 
+  
   geoJSON.features.forEach((feature) => {
     if (feature.geometry.type === 'MultiPolygon') {
       const coordenadas = feature.geometry.coordinates
@@ -133,6 +136,7 @@ async function dibujarGeojson(archivo, colores) {
       })
     }
   })
+  archivosGeoJson[archivo] = geoJSON;
 
   scene.add(group)
 
@@ -170,9 +174,42 @@ function convertirCoordenadasGeograficasACartesianas(coord) {
 
 // Función para verificar en qué geometría del GeoJSON se encuentra una coordenada
 function verificarGeometriaGeoJSON(coordinates) {
-  const point = TURF.point([coordinates.long, coordinates.lat])
-  // Lógica para recorrer las geometrías del GeoJSON y verificar la inclusión del punto
-  // Implementar aquí la lógica para recorrer el GeoJSON y verificar la inclusión del punto
+  const point = TURF.point([coordinates.long, coordinates.lat]);
+
+  // Recorrer las geometrías del GeoJSON y verificar la inclusión del punto
+  for (const feature of archivosGeoJson['argentina.geojson'].features) {
+    if (feature.geometry.type === 'Polygon') {
+      const polygon = feature.geometry.coordinates[0]; // Obtener los vértices del polígono
+      if (puntoEnPoligono(point, polygon)) {
+        console.log('La coordenada está dentro del polígono:', feature.properties.name);
+        return feature.geometry.coordinates;
+      }
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      for (const coords of feature.geometry.coordinates) {
+        const polygon = coords[0]; // Obtener los vértices del polígono
+        if (puntoEnPoligono(point, polygon)) {
+          console.log('La coordenada está dentro del polígono:', feature.properties.name);
+          return coords;
+        }
+      }
+    }
+  }
+
+  console.log('La coordenada no está dentro de ninguna geometría del GeoJSON.');
+  return null;
+}
+
+// Función para verificar si un punto está dentro de un polígono
+function puntoEnPoligono(point, polygon) {
+  let intersect = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+    const intersecta = ((yi > point[1]) != (yj > point[1])) &&
+                       (point[0] < (xj - xi) * (point[1] - yi) / (yj - yi) + xi);
+    if (intersecta) intersect = !intersect;
+  }
+  return intersect;
 }
 
 // Crear línea de puntos para el GeoJSON
