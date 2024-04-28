@@ -1,5 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as TURF from 'turf-jsts/jsts.js'
+
+console.log('turf', TURF);
+
 import './style.css'
 
 const canvas = document.querySelector('#canvas')

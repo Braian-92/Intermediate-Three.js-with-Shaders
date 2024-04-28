@@ -1,0 +1,6 @@
+npm run dev
+
+https://www.hallada.net/2020/02/01/generating-icosahedrons-and-hexspheres-in-rust.html
+
+https://www.npmjs.com/package/@turf/turf
+npm install @turf/turf
