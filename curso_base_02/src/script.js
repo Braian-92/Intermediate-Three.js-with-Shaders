@@ -27,7 +27,7 @@ scene.add(planet)
 planet.name = 'planeta'
 
 // Crear esfera pequeña que seguirá al mouse
-const pointerGeometry = new THREE.SphereGeometry(0.05, 16, 16) // Tamaño fijo para la esfera del puntero
+const pointerGeometry = new THREE.SphereGeometry(0.01, 16, 16) // Tamaño fijo para la esfera del puntero
 const pointerMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0.3 })
 const pointer = new THREE.Mesh(pointerGeometry, pointerMaterial)
 scene.add(pointer)
@@ -65,6 +65,31 @@ function onMouseMove(event) {
 }
 
 document.addEventListener('mousemove', onMouseMove, false)
+
+// Función para convertir coordenadas cartesianas a geográficas
+function convertirCoordenadasCartesianasAGeograficas(coord) {
+  const radius = Math.sqrt(coord.x * coord.x + coord.y * coord.y + coord.z * coord.z)
+  const latitudeRad = Math.asin(coord.y / radius)
+  const longitudeRad = Math.atan2(coord.x, coord.z)
+  const latitude = (latitudeRad * 180) / Math.PI
+  const longitude = (longitudeRad * 180) / Math.PI
+
+  return { lat: latitude, long: longitude }
+}
+
+// Función para manejar el evento click
+function onClick(event) {
+  raycaster.setFromCamera(mouse, camera)
+  const intersects = raycaster.intersectObject(planet)
+  if (intersects.length > 0) {
+    const intersectPoint = intersects[0].point
+    const coordinates = convertirCoordenadasCartesianasAGeograficas(intersectPoint)
+    console.log('Coordenadas latitud y longitud:', coordinates)
+    // Llamar a la función que maneja las coordenadas aquí
+  }
+}
+
+document.addEventListener('click', onClick, false)
 
 // Función para cargar archivos GeoJSON y dibujarlos
 function cargarGeoJSON(url) {
