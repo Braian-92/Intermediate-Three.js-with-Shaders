@@ -18,6 +18,12 @@ const camera = new THREE.PerspectiveCamera(
 camera.position.z = 20
 scene.add(camera)
 
+// Crear esfera que representa al mundo
+const geometry = new THREE.SphereGeometry(5, 32, 32)
+const material = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true, transparent: true, opacity: 0.05 })
+const sphere = new THREE.Mesh(geometry, material)
+scene.add(sphere)
+
 const renderer = new THREE.WebGLRenderer({
   canvas,
   antialias: true
@@ -42,34 +48,30 @@ function cargarGeoJSON(url) {
 }
 
 async function dibujarGeojson(archivo, colores) {
-  // const argentinaGeoJSON = await cargarGeoJSON('argentina.geojson')
-  const argentinaGeoJSON = await cargarGeoJSON(archivo)
+  const geoJSON = await cargarGeoJSON(archivo)
 
-  if (!argentinaGeoJSON) {
-    console.error('No se pudo cargar el archivo GeoJSON de Argentina.')
+  if (!geoJSON) {
+    console.error(`No se pudo cargar el archivo GeoJSON: ${archivo}`)
     return
   }
 
   const group = new THREE.Group()
 
-  argentinaGeoJSON.features.forEach((feature) => {
+  geoJSON.features.forEach((feature) => {
     if (feature.geometry.type === 'MultiPolygon') {
       const coordenadas = feature.geometry.coordinates
 
-      
-
       coordenadas.forEach((poligono) => {
-        let anilloExteriorXYZ = []
         poligono.forEach((anilloExterior) => {
-          const anilloExteriorXYZ = anilloExterior.map(LATLONG => {
-            const restXYZ = convertirCoordenadasGeograficasACartesianas({
+          const puntosXYZ = anilloExterior.map(LATLONG => {
+            const { x, y, z } = convertirCoordenadasGeograficasACartesianas({
               lat: LATLONG[1],
               long: LATLONG[0]
             })
-            return { x: restXYZ.x, y: restXYZ.y, z: restXYZ.z }
+            return { x, y, z }
           })
 
-          const linea = crearLineasDePuntos(anilloExteriorXYZ, colores)
+          const linea = crearLineaDePuntos(puntosXYZ, colores)
           group.add(linea)
         })
       })
@@ -91,20 +93,18 @@ function convertirCoordenadasGeograficasACartesianas(coord) {
   return { x, y, z }
 }
 
-function crearLineasDePuntos(puntos, colores) {
+function crearLineaDePuntos(puntos, colores) {
   const material = new THREE.LineBasicMaterial({ vertexColors: true })
   const geometria = new THREE.BufferGeometry()
   const vertices = []
   const colorArray = []
   const cantidadColores = colores.length
 
-  for (let i = 0; i < puntos.length; i++) {
-    const punto = puntos[i]
+  puntos.forEach((punto, i) => {
     vertices.push(punto.x, punto.y, punto.z)
-    const colorIndex = Math.floor((i / puntos.length) * cantidadColores)
-    const color = colores[colorIndex % cantidadColores] || new THREE.Color(0xffffff)
+    const color = colores[i % cantidadColores] || new THREE.Color(0xffffff)
     colorArray.push(color.r, color.g, color.b)
-  }
+  })
 
   geometria.setAttribute(
     'position',
@@ -127,21 +127,22 @@ const colores2 = [
 ]
 dibujarGeojson('argentina.geojson', colores2)
 
-//Resizing
-window.addEventListener('resize', () => {
-  // Actualizar tamaño del lienzo
+// Resizing
+function onWindowResize() {
   const width = window.innerWidth
   const height = window.innerHeight
   renderer.setSize(width, height)
   camera.aspect = width / height
   camera.updateProjectionMatrix()
-})
+}
+
+window.addEventListener('resize', onWindowResize)
 
 // Función para animar el lienzo
-const animate = () => {
+function animate() {
   orbitControls.update()
   renderer.render(scene, camera)
-  window.requestAnimationFrame(animate)
+  requestAnimationFrame(animate)
 }
 
 animate()
