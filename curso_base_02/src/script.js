@@ -5,7 +5,7 @@ import paisesJson from './paises.json'
 console.log('paisesJson', paisesJson)
 
 import * as THREE from 'three'
-import * as Curves from 'three/examples/jsm/curves/CurveExtras.js';
+import * as Curves from 'three/examples/jsm/curves/CurveExtras.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import gsap from 'gsap'
 
@@ -54,9 +54,30 @@ renderer.setPixelRatio(window.devicePixelRatio)
 // renderer.setClearColor("2728#2c", 1.0);
 renderer.setSize(canvas.offsetWidth, canvas.offsetHeight)
 
-//OrbitControl
-const orbitControls = new OrbitControls(camera, canvas)
-orbitControls.enableDamping = true
+// //OrbitControl
+// const orbitControls = new OrbitControls(camera, canvas)
+// orbitControls.enableDamping = true
+
+// Crear los controles de órbita
+const orbitControls = new OrbitControls(camera, canvas);
+
+// Habilitar el amortiguamiento para movimientos suaves
+orbitControls.enableDamping = true;
+
+// Velocidad de amortiguamiento para los movimientos de la cámara (ajusta según sea necesario)
+orbitControls.dampingFactor = 0.1;
+
+// Habilitar el límite del ángulo de inclinación vertical (evita la rotación excesiva hacia arriba o hacia abajo)
+// orbitControls.maxPolarAngle = Math.PI / 2;
+
+// Velocidad de rotación
+orbitControls.rotateSpeed = 0.3;
+
+// Velocidad de acercamiento/alejamiento (ajusta según sea necesario)
+orbitControls.zoomSpeed = 0.5;
+
+// Velocidad de desplazamiento (ajusta según sea necesario)
+orbitControls.panSpeed = 0.5;
 
 const group = new THREE.Group()
 scene.add(group)
@@ -161,7 +182,7 @@ function valorEquivalente(valor, minimo, maximo, escalaMin, escalaMax) {
 }
 
 function crearPunto(parametros, escalas) {
-  console.log("🚀 ~ crearPunto ~ escalas:", escalas)
+  console.log('🚀 ~ crearPunto ~ escalas:', escalas)
   const extencionMin = 0.1
   const extencionMax = 3
 
@@ -172,7 +193,7 @@ function crearPunto(parametros, escalas) {
     extencionMin,
     extencionMax
   )
-  console.log("🚀 ~ crearPunto ~ extencion:", extencion)
+  console.log('🚀 ~ crearPunto ~ extencion:', extencion)
 
   const box = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 0.1, extencion),
@@ -392,6 +413,18 @@ paises.forEach((pais) => {
 
 let arrayPaisesV2 = []
 
+function convertirCoordenadasGeograficasACartesianas(coord) {
+  const latitudeRad = (coord.lat / 180) * Math.PI
+  const longitudeRad = (coord.long / 180) * Math.PI
+  const radius = 5
+
+  const x = radius * Math.cos(latitudeRad) * Math.sin(longitudeRad)
+  const y = radius * Math.sin(latitudeRad)
+  const z = radius * Math.cos(latitudeRad) * Math.cos(longitudeRad)
+
+  return { x, y, z }
+}
+let curvaTestV3 = []
 paisesJson.forEach((paisV2Json) => {
   const parametrosV2 = {
     lat: paisV2Json.latlng[0],
@@ -400,6 +433,14 @@ paisesJson.forEach((paisV2Json) => {
     poblacion: paisV2Json.population
   }
   arrayPaisesV2.push(parametrosV2)
+
+  const restXYZ = convertirCoordenadasGeograficasACartesianas({
+    lat: paisV2Json.latlng[0],
+    long: paisV2Json.latlng[1]
+  })
+
+  curvaTestV3.push({ x: restXYZ.x, y: restXYZ.y, z: restXYZ.z })
+
 })
 
 const minMaxPaisesV2 = buscarMaxMinPoblacion(arrayPaisesV2)
@@ -408,6 +449,123 @@ arrayPaisesV2.forEach((paisesV2) => {
 })
 
 sphere.rotation.y = -Math.PI / 2
+
+//! proyecto geo
+// Función para cargar y procesar el archivo GeoJSON
+async function cargarGeoJSON(url) {
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error al cargar el archivo GeoJSON:', error);
+    return null;
+  }
+}
+
+// Función para dibujar las localidades de Argentina
+async function dibujarLocalidadesDeArgentina() {
+  // Cargar el archivo GeoJSON de Argentina
+  const argentinaGeoJSON = await cargarGeoJSON('argentina.geojson');
+
+  // Verificar si se cargó correctamente
+  if (!argentinaGeoJSON) {
+    console.error('No se pudo cargar el archivo GeoJSON de Argentina.');
+    return;
+  }
+
+  // Crear un grupo para almacenar las líneas de los polígonos de las localidades
+  const group = new THREE.Group();
+
+  // Iterar sobre las características (features) del GeoJSON
+  argentinaGeoJSON.features.forEach(feature => {
+    console.log("🚀 ~ dibujarLocalidadesDeArgentina ~ feature:", feature)
+    // Verificar si la característica es un polígono
+    if (feature.geometry.type === 'MultiPolygon') {
+      // Obtener las coordenadas de los polígonos
+      const coordenadas = feature.geometry.coordinates;
+
+      const colores = [
+        new THREE.Color(0xff0000),
+        // new THREE.Color(0x00ff00)
+      ];
+      // Iterar sobre los polígonos
+      coordenadas.forEach(poligono => {
+        // Iterar sobre los anillos exteriores de cada polígono
+        poligono.forEach(anilloExterior => {
+          let anilloExteriorXYZ = [];
+          anilloExterior.forEach(LATLONG => {
+            const restXYZ = convertirCoordenadasGeograficasACartesianas({
+              lat: LATLONG[1],
+              long: LATLONG[0]
+            })
+          
+            anilloExteriorXYZ.push({ x: restXYZ.x, y: restXYZ.y, z: restXYZ.z })
+          });
+
+          // Crear una línea para el anillo exterior y agregarla al grupo
+          console.log('anilloExteriorXYZ', anilloExteriorXYZ);
+          // debugger;
+          const linea = crearLineasDePuntos(anilloExteriorXYZ, colores);
+          group.add(linea);
+        });
+
+          
+        // Iterar sobre los anillos interiores de cada polígono
+        for (let i = 1; i < poligono.length; i++) {
+          // Crear una línea para el anillo interior y agregarla al grupo
+          console.log('poligono i', poligono[i]);
+          debugger
+          // const linea = crearLineasDePuntos(poligono[i], colores);
+          // group.add(linea);
+        }
+      });
+    }
+  });
+  
+
+  // Agregar el grupo al escena
+  scene.add(group);
+}
+
+// Llamar a la función para dibujar las localidades de Argentina
+dibujarLocalidadesDeArgentina();
+
+function crearLineasDePuntos(puntos, colores) {
+  const material = new THREE.LineBasicMaterial({ vertexColors: true });
+  const geometria = new THREE.BufferGeometry();
+  const vertices = [];
+  const colorArray = [];
+  const cantidadColores = colores.length;
+
+  for (let i = 0; i < puntos.length; i++) {
+    const punto = puntos[i];
+    vertices.push(punto.x, punto.y, punto.z);
+    const colorIndex = Math.floor((i / puntos.length) * cantidadColores);
+    const color = colores[colorIndex % cantidadColores] || new THREE.Color(0xffffff); // Si no se proporciona un color, se usa blanco
+    colorArray.push(color.r, color.g, color.b);
+  }
+
+  geometria.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geometria.setAttribute('color', new THREE.Float32BufferAttribute(colorArray, 3));
+
+  const linea = new THREE.Line(geometria, material);
+  return linea;
+}
+
+// Ejemplo de uso:
+const puntos = [
+  { x: -1, y: -1, z: 0 },
+  { x: 1, y: -1, z: 0 },
+  { x: 1, y: 1, z: 0 },
+  { x: -1, y: 1, z: 0 }
+];
+const colores = [
+  new THREE.Color(0xff0000),
+  // new THREE.Color(0x00ff00)
+];
+// const lineas = crearLineasDePuntos(curvaTestV3, colores);
+// scene.add(lineas);
 
 const popup = document.getElementById('popup')
 const popup_texto_01 = document.getElementById('text1')
